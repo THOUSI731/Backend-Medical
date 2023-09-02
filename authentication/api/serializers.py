@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import User
+from ..models import User,Note
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
@@ -9,6 +9,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
 
         token['user_id'] = user.id
+        token['username'] = user.username
         token['email'] = user.email
         token['is_blocked'] = user.is_blocked
 
@@ -18,7 +19,7 @@ class UserRegisterationSerializer(serializers.ModelSerializer):
      password2 = serializers.CharField(style={'input_type':'password'},write_only=True)
      class Meta:
           model = User
-          fields = ['first_name','last_name','username','email','password','password2']
+          fields = ['first_name','last_name','username','email','password','password2','account_type']
           extra_kwargs = {
                'password':{'write_only':True}
           }
@@ -40,3 +41,8 @@ class UserLoginSerializer(serializers.ModelSerializer):
           model = User
           fields = ['email','password']
          
+         
+class NoteSerializer(serializers.ModelSerializer):
+     class Meta:
+          model = Note
+          fields = '__all__'

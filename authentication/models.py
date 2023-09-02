@@ -5,6 +5,7 @@ from django.dispatch import receiver
 # Create your models here.
 
 
+
 class User(AbstractUser):
      ACCOUNT_TYPE_CHOICES = (
         ('user', 'User'),
@@ -39,3 +40,11 @@ def create_user_profile(sender, instance, created, **kwargs):
           
 def save_user_profile(sender, instance, **kwargs):
      instance.profile.save()
+     
+
+class Note(models.Model):
+     user = models.ForeignKey(User,on_delete=models.CASCADE,null=True)
+     body = models.TextField()
+     
+     def __str__(self) -> str:
+          return self.user.email

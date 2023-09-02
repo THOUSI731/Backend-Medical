@@ -2,9 +2,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
-from .api.serializers import UserRegisterationSerializer,MyTokenObtainPairSerializer
-from .models import User
+from .api.serializers import UserRegisterationSerializer,MyTokenObtainPairSerializer,NoteSerializer
+from .models import User,Note
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.permissions import IsAuthenticated
 # Create your views here.
 
 @api_view(['GET'])
@@ -28,7 +29,8 @@ class UserRegisterView(APIView):
                     username = serializer.validated_data['username'],
                     first_name = serializer.validated_data['first_name'],
                     last_name = serializer.validated_data['last_name'],
-                    email = serializer.validated_data['email']
+                    email = serializer.validated_data['email'],
+                    account_type = serializer.validated_data['account_type']
                )
                user.set_password(serializer.validated_data['password'])
                user.save()
@@ -69,3 +71,9 @@ class UserRegisterView(APIView):
 
 
 
+class NoteListView(APIView):
+     permission_classes = [IsAuthenticated]
+     def get(self,request):
+          queryset = Note.objects.all()
+          serialzer = NoteSerializer(queryset,many=True)
+          return Response(serialzer.data,status=status.HTTP_200_OK)     
