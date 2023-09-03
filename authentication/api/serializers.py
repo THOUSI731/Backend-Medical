@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import User,Note
+from ..models import User,Profile
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
@@ -40,9 +40,11 @@ class UserLoginSerializer(serializers.ModelSerializer):
      class Meta:
           model = User
           fields = ['email','password']
-         
-         
-class NoteSerializer(serializers.ModelSerializer):
+          
+     
+class UserProfileSerializer(serializers.ModelSerializer):
      class Meta:
-          model = Note
-          fields = '__all__'
+          model = User
+          fields = ['first_name','last_name','username','email','account_type']
+         
+          

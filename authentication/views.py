@@ -2,8 +2,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
-from .api.serializers import UserRegisterationSerializer,MyTokenObtainPairSerializer,NoteSerializer
-from .models import User,Note
+from .api.serializers import UserRegisterationSerializer,MyTokenObtainPairSerializer,UserProfileSerializer
+from .models import User
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
 # Create your views here.
@@ -37,6 +37,23 @@ class UserRegisterView(APIView):
                return Response({'msg':'Registeration Successfull'},status=status.HTTP_201_CREATED)
           return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
+class UserHomeView(APIView):  
+     def get(self,request,*args,**kwargs):
+          match request.user.account_type:
+               case 'user':
+                    doctors = User.objects.filter(account_type='doctor')
+                    serializer = UserProfileSerializer(doctors,many=True)
+                    return Response(serializer.data,status=status.HTTP_200_OK)                    
+               case 'doctor':
+                    print('doctor')
+                    doctor = User.objects.filter(username=request.user).first()
+                    serializer = UserProfileSerializer(doctor,many=False)
+                    print(serializer)
+                    return Response(serializer.data,status=status.HTTP_200_OK)          
+          
+          
+          
+          
 # from rest_framework.permissions import IsAuthenticated
 
 # class LogoutView(APIView):
@@ -69,11 +86,3 @@ class UserRegisterView(APIView):
 #                     return Response({'errors':{'non_field_errors':['Email or Password is not valid']}},status=status.HTTP_401_UNAUTHORIZED)
 #           return Response(serializer.errors,status=status.HTTP_404_NOT_FOUND)
 
-
-
-class NoteListView(APIView):
-     permission_classes = [IsAuthenticated]
-     def get(self,request):
-          queryset = Note.objects.all()
-          serialzer = NoteSerializer(queryset,many=True)
-          return Response(serialzer.data,status=status.HTTP_200_OK)     
