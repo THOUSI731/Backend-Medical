@@ -6,6 +6,8 @@ from .api.serializers import UserRegisterationSerializer,MyTokenObtainPairSerial
 from .models import User
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
+
+from rest_framework.generics import UpdateAPIView
 # Create your views here.
 
 @api_view(['GET'])
@@ -20,6 +22,8 @@ def getRoutes(request):
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
+    
+    
 
 class UserRegisterView(APIView):
      def post(self,request,format=None):
@@ -38,14 +42,13 @@ class UserRegisterView(APIView):
           return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class UserHomeView(APIView):  
-     def get(self,request,*args,**kwargs):
+     def get(self,request,format=None):
           match request.user.account_type:
                case 'user':
                     doctors = User.objects.filter(account_type='doctor')
                     serializer = UserProfileSerializer(doctors,many=True)
                     return Response(serializer.data,status=status.HTTP_200_OK)                    
                case 'doctor':
-                    print('doctor')
                     doctor = User.objects.filter(username=request.user).first()
                     serializer = UserProfileSerializer(doctor,many=False)
                     print(serializer)
@@ -53,6 +56,34 @@ class UserHomeView(APIView):
           
           
           
+class UserProfileView(APIView):
+     permission_classes=[IsAuthenticated]
+     def get(self,request,format=None):
+          serializer= UserProfileSerializer(request.user)
+          return Response(serializer.data,status=status.HTTP_200_OK)
+     
+     def put(self,request,format=None):
+          print(request.user)
+          try: 
+               user_profile = User.objects.get(email=request.user)
+          except User.DoesNotExist:
+               return Response({"msg":"There is no user put request"},status=status.HTTP_400_BAD_REQUEST)
+          serializer = UserProfileSerializer(user_profile,data=request.data)
+          if serializer.is_valid():
+               serializer.save()
+               return Response({'msg':'Profile Updated Successfully',"method":"PUT"})
+          return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST) 
+     
+     def patch(self,request,format=None):
+          try: 
+               user_profile = User.objects.get(email=request.user)
+          except User.DoesNotExist:
+               return Response({"msg":"There is no user"},status=status.HTTP_400_BAD_REQUEST)
+          serializer = UserProfileSerializer(user_profile,data=request.data,partial=True)
+          if serializer.is_valid():
+               serializer.save()
+               return Response({'msg':'Profile Updated Successfully',"method":"PATCH"},status=status.HTTP_200_OK)
+          return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST) 
           
 # from rest_framework.permissions import IsAuthenticated
 
