@@ -7,7 +7,6 @@ from .models import User
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
 
-from rest_framework.generics import UpdateAPIView
 # Create your views here.
 
 @api_view(['GET'])
